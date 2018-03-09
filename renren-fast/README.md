@@ -45,16 +45,6 @@ renren-fast
 │  └─views  项目静态页面
 
 ```
-<br> 
-
-**如何交流、反馈、参与贡献？** 
-- 开发文档：http://www.renren.io/open/renren-fast/
-- Git仓库：http://git.oschina.net/babaio/renren-fast
-- 其他项目：http://www.renren.io/open/
-- [编程入门教程](http://www.renren.io)：http://www.renren.io   
-- 官方QQ群：324780204、145799952
-- 如需关注项目最新动态，请Watch、Star项目，同时也是对项目最好的支持
-<br> 
 
 
 **技术选型：** 
@@ -62,6 +52,7 @@ renren-fast
 - 安全框架：Apache Shiro 1.3
 - 视图框架：Spring MVC 4.3
 - 持久层框架：MyBatis 3.3
+- webService:cxf 3.2.1
 - 定时器：Quartz 2.3
 - 数据库连接池：Druid 1.0
 - 日志管理：SLF4J 1.7、Log4j
@@ -79,11 +70,6 @@ renren-fast
 - 账号密码：admin/admin
 - Swagger路径：http://localhost:8080/renren-fast/swagger/index.html
 
-
- **项目演示**
-- 演示地址：http://demo.open.renren.io/renren-fast
-- 账号密码：admin/admin
-<br> 
 
 **接口文档效果图：**
 ![输入图片说明](http://cdn.renren.io/img/6e8d7575fb8240d49b949dc0f02547bc "在这里输入图片标题")
