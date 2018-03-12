@@ -3,7 +3,6 @@ package io.renren.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,9 +25,9 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String group;
     
-    @Value("${spring。kafka.jks.location}")
-    private String jksLocation;
-
+	@Value("${spring.kafka.sasl.jaas.config}")
+	private String saslJaasConf;
+    
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
@@ -51,20 +50,25 @@ public class KafkaConsumerConfig {
 //		}
 //	}
     public ConsumerFactory<String, String> consumerFactory() {
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
-        properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "15000");
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, group);
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-        System.setProperty("java.security.auth.login.config", KafkaConsumerConfig.class.getClassLoader().getResource("kafka_jaas.conf").toExternalForm()); //配置文件路径
-        properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
-        properties.put("sasl.mechanism", "PLAIN");
-       // System.setProperty("java.security.auth.login.config", KafkaConsumerConfig.class.getClassLoader().getResource("kafka_jaas.conf").toExternalForm());
-        return new DefaultKafkaConsumerFactory<String, String>(properties);
+        return new DefaultKafkaConsumerFactory<String, String>(consumerConfigs());
     }
 
+    
+    public Map<String, Object> consumerConfigs() {
+	    System.setProperty("java.security.auth.login.config",saslJaasConf); // 环境变量添加，需要输入配置文件的路径
+//        System.setProperty("java.security.auth.login.config", this.getClass().getClassLoader().getResource("kafka-jaas.conf").toString()); // 环境变量添加，需要输入配置文件的路径
+         
+        Map<String, Object> propsMap = new HashMap<>();
+        propsMap.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
+        propsMap.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        propsMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
+        propsMap.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "15000");
+        propsMap.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        propsMap.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        propsMap.put(ConsumerConfig.GROUP_ID_CONFIG, group);
+        propsMap.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        propsMap.put("security.protocol","SASL_SSL");
+        propsMap.put("sasl.mechanism", "PLAIN");
+        return propsMap;
+    }
 }

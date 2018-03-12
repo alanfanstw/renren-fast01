@@ -3,7 +3,6 @@ package io.renren.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,28 +19,33 @@ public class KafkaProducerConfig {
 
 	@Value("${spring.kafka.producer.bootstrap-servers}")
     private String brokers;
-
+	
+	@Value("${spring.kafka.sasl.jaas.config}")
+	private String saslJaasConf;
+	
+    public Map<String, Object> producerConfigs() {
+    	 		System.setProperty("java.security.auth.login.config",saslJaasConf); // 环境变量添加，需要输入配置文件的路径
+//    	  System.setProperty("java.security.auth.login.config", this.getClass().getClassLoader().getResource("kakfa-jaas.conf").toString()); // 环境变量添加，需要输入配置文件的路径
+    	        Map<String, Object> props = new HashMap<>();
+    	        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
+    	        props.put(ProducerConfig.RETRIES_CONFIG, 0);
+    	        props.put(ProducerConfig.BATCH_SIZE_CONFIG, 4096);
+    	        props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
+    	        props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 40960);
+    	        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    	        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    	        props.put("security.protocol", "SASL_SSL");
+    	        props.put("sasl.mechanism", "PLAIN");
+    	        return props;
+    	    }
+    
+	@Bean
+    public ProducerFactory<String, String> producerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate() {
-        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<String, String>(producerFactory());
-        return kafkaTemplate;
-    }
-    
-    public ProducerFactory<String, String> producerFactory() {
-
-        // set the producer properties
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-        properties.put(ProducerConfig.BATCH_SIZE_CONFIG, 65536);
-        properties.put(ProducerConfig.LINGER_MS_CONFIG, 1);
-        properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 524288);
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        System.setProperty("java.security.auth.login.config", KafkaProducerConfig.class.getClassLoader().getResource("kafka_jaas.conf").toExternalForm()); //配置文件路径
-        properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
-        properties.put("sasl.mechanism", "PLAIN");
-        //System.setProperty("java.security.auth.login.config", KafkaConsumerConfig.class.getClassLoader().getResource("kakfa_jaas.conf").toExternalForm());
-        return new DefaultKafkaProducerFactory<String, String>(properties);
+        return new KafkaTemplate<String, String>(producerFactory());
     }
 
 }

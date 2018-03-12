@@ -51,8 +51,9 @@ spring:
           key-serializer: org.apache.kafka.common.serialization.StringSerializer
           value-serializer: org.apache.kafka.common.serialization.StringSerializer
           bootstrap-servers: kafka.p1.sbg.queue.ovh.net:9093
-        jks:
-          localtion: classpath:kafka_jaas.conf
+        sasl:
+          jaas:
+            config: D:\\Program Files\\Git\\tmp\\renren-fast\\src\\main\\resources\\kafka-jaas.conf
 
 # Mybatis配置
 mybatis:

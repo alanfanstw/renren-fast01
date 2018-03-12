@@ -28,7 +28,7 @@ public class kafkaTest {
        List<String> list = new ArrayList<String>();
        list.add("testkafka");
        list.add("testcxf");
-       list.add("testspringboot");
+       list.add("kafkaTestaaaa");
        kafkaTemplate.send("alan.test", gson.toJson(list));
     }
 
