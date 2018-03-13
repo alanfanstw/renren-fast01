@@ -53,6 +53,7 @@ renren-fast
 - 视图框架：Spring MVC 4.3
 - 持久层框架：MyBatis 3.3
 - webService:cxf 3.2.1 
+- 消息队列：kafka 0.10.2.0
 - 定时器：Quartz 2.3
 - 数据库连接池：Druid 1.0
 - 日志管理：SLF4J 1.7、Log4j

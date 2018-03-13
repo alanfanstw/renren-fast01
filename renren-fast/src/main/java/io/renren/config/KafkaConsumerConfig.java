@@ -1,5 +1,6 @@
 package io.renren.config;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.util.ResourceUtils;
 
 @Configuration
 @EnableKafka
@@ -25,11 +27,8 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String group;
     
-	@Value("${spring.kafka.sasl.jaas.config}")
-	private String saslJaasConf;
-    
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() throws FileNotFoundException {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
         factory.setConsumerFactory(consumerFactory());
         factory.setConcurrency(4);
@@ -42,21 +41,13 @@ public class KafkaConsumerConfig {
         return new KafkaListeners();
     }
     
-//    public KafkaConsumerConfig() {
-//    	System.out.println("KafkaConsumerConfig.class.getClassLoader()"+KafkaConsumerConfig.class.getClassLoader());
-//		URL authLocation = KafkaConsumerConfig.class.getClassLoader().getResource("kafka_jaas.conf");
-//		if (System.getProperty("java.security.auth.login.config") == null) {
-//			System.setProperty("java.security.auth.login.config", authLocation.toExternalForm());
-//		}
-//	}
-    public ConsumerFactory<String, String> consumerFactory() {
+    public ConsumerFactory<String, String> consumerFactory() throws FileNotFoundException {
         return new DefaultKafkaConsumerFactory<String, String>(consumerConfigs());
     }
 
     
-    public Map<String, Object> consumerConfigs() {
-	    System.setProperty("java.security.auth.login.config",saslJaasConf); // 环境变量添加，需要输入配置文件的路径
-//        System.setProperty("java.security.auth.login.config", this.getClass().getClassLoader().getResource("kafka-jaas.conf").toString()); // 环境变量添加，需要输入配置文件的路径
+    public Map<String, Object> consumerConfigs() throws FileNotFoundException {
+	    System.setProperty("java.security.auth.login.config", ResourceUtils.getFile("classpath:kafka-jaas.conf").getAbsolutePath().toString()); // 环境变量添加，需要输入配置文件的路径
          
         Map<String, Object> propsMap = new HashMap<>();
         propsMap.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);

@@ -1,5 +1,6 @@
 package io.renren.config;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.util.ResourceUtils;
 
 @Configuration
 @EnableKafka
@@ -20,12 +22,8 @@ public class KafkaProducerConfig {
 	@Value("${spring.kafka.producer.bootstrap-servers}")
     private String brokers;
 	
-	@Value("${spring.kafka.sasl.jaas.config}")
-	private String saslJaasConf;
-	
-    public Map<String, Object> producerConfigs() {
-    	 		System.setProperty("java.security.auth.login.config",saslJaasConf); // 环境变量添加，需要输入配置文件的路径
-//    	  System.setProperty("java.security.auth.login.config", this.getClass().getClassLoader().getResource("kakfa-jaas.conf").toString()); // 环境变量添加，需要输入配置文件的路径
+    public Map<String, Object> producerConfigs() throws FileNotFoundException {
+    	  		System.setProperty("java.security.auth.login.config", ResourceUtils.getFile("classpath:kafka-jaas.conf").getAbsolutePath().toString()); // 环境变量添加，需要输入配置文件的路径
     	        Map<String, Object> props = new HashMap<>();
     	        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
     	        props.put(ProducerConfig.RETRIES_CONFIG, 0);
@@ -40,11 +38,11 @@ public class KafkaProducerConfig {
     	    }
     
 	@Bean
-    public ProducerFactory<String, String> producerFactory() {
+    public ProducerFactory<String, String> producerFactory() throws FileNotFoundException {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
+    public KafkaTemplate<String, String> kafkaTemplate() throws FileNotFoundException {
         return new KafkaTemplate<String, String>(producerFactory());
     }
 
